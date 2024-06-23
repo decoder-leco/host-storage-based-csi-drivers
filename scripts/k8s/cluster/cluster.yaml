@@ -34,6 +34,7 @@ nodes:
   - hostPath: /etc/timezone
     containerPath: /etc/timezone
     readOnly: true
+    
   # - hostPath: /etc/localtime
   #   containerPath: /etc/localtime
   #   readOnly: true

@@ -220,6 +220,13 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 
 
 
+# ---
+#  Cert manager images
+# - 
+#  quay.io/jetstack/cert-manager-ctl:v1.7.0
+#  quay.io/jetstack/cert-manager-cainjector:v1.7.0
+#  quay.io/jetstack/cert-manager-controller:v1.7.0
+#  quay.io/jetstack/cert-manager-webhook:v1.7.0
 
 
 # export TOPOLVM_K8S_NS="topolvm-system"
@@ -228,12 +235,20 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 
 helm install --namespace=${TOPOLVM_K8S_NS} \
     topolvm topolvm/topolvm \
-    --set cert-manager.enabled=false \
+    --set cert-manager.enabled=true \
     --set lvmd.deviceClasses[0].name="hdd" \
     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
     --set image.tag="${TOPOLVM_IMG_TAG}"
     
+
+helm upgrade --namespace=${TOPOLVM_K8S_NS} \
+    topolvm topolvm/topolvm \
+    --set cert-manager.enabled=true \
+    --set lvmd.deviceClasses[0].name="hdd" \
+    --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
+    --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
+    --set image.tag="${TOPOLVM_IMG_TAG}"
 # cat values.yaml | yq '.lvmd.deviceClasses[0]["volume-group"]'
 # ~$ cat values.yaml | yq '.["cert-manager"]' -y
 # enabled: false
