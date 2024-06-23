@@ -65,6 +65,7 @@ helm repo update || true
 
 helm delete topolvm -n topolvm-system || true
 
+# Cert manager crds are required even if cert manager is disabled in helm chart values.
 export CERT_MNGR_VERSION=${CERT_MNGR_VERSION:-"v1.14.7"}
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CERT_MNGR_VERSION}/cert-manager.crds.yaml || true
 
