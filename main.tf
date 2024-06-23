@@ -186,9 +186,17 @@ resource "null_resource" "topolvm_csi_provisioning" {
     source      = "./scripts/k8s/csi/topolvm/provision.sh"
     destination = "/tmp/provision.topolvm.csi.sh"
   }
+  provisioner "file" {
+    source      = "./scripts/prepare_os/install_golang.sh"
+    destination = "/tmp/install.golang.topolvm.csi.sh"
+  }
+  
   provisioner "remote-exec" {
     inline = [
       "rm -f ~/.topolvm_provisioning.env.sh || true",
+      "echo \"export TOPOLVM_CSI_GOLANG_VERSION=${var.topolvm_csi_golang_version}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
+      "chmod +x /tmp/install.golang.topolvm.csi.sh",
+      "/tmp/install.golang.topolvm.csi.sh",
       "echo \"export TOPOLVM_K8S_NS=${var.topolvm_k8s_namespace}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "chmod +x /tmp/provision.topolvm.csi.sh",

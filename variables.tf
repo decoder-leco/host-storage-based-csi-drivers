@@ -103,3 +103,12 @@ variable "topolvm_k8s_namespace" {
   description = "The kubernetes namespace in which to provision the TOPOLVM Kubernetes CSI driver."
   default     = "topolvm-system"
 }
+
+# --- 
+#  https://go.dev/dl/
+variable "topolvm_csi_golang_version" {
+  type        = string
+  description = "The Golang version to use to build from source the TOPOLVM Kubernetes CSI driver, and its docker image."
+  default     = "1.22.4"
+}
+

@@ -35,6 +35,63 @@ fi;
 
 
 
+
+
+
+teardownLvmNonFormattedDiskSetup() {
+
+figlet "teardown LVM setup"
+
+# export DEVICE_NAME="/dev/$(basename $(readlink /dev/disk/by-id/google-${DISK_NAME}))"
+
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> TOPOLVM_DISK_DEVICE_NAME=[${TOPOLVM_DISK_DEVICE_NAME}]"
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+
+# Creating physical volumes
+echo ">> List Linux Disk Devices, with their sizes and filesystem:"
+
+sudo lsblk -o name,size,fstype
+
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> >>> # Remove LVM Physical Volumes from volume group: "
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+vgreduce ${TOPOLVM_VOL_GRP_NAME} ${TOPOLVM_DISK_DEVICE_NAME} || true
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> >>> # Remove LVM Physical Volumes: "
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+
+# sudo pvcreate ${TOPOLVM_DISK_DEVICE_NAME}
+sudo pvremove ${TOPOLVM_DISK_DEVICE_NAME} || true
+
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+echo ">>> >>> # Remove LVM Volume Group: "
+echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
+
+sudo vgremove ${TOPOLVM_VOL_GRP_NAME}
+
+echo ">> List LVM Physical Volumes:"
+
+sudo pvscan
+sudo pvdisplay
+sudo pvs
+
+
+echo ">> List LVM Volume Groups:"
+
+sudo vgscan
+sudo vgdisplay
+sudo vgs
+
+
+}
+
+
+
+
+
 lvmNonFormattedDiskSetup() {
 
 figlet "LVM setup"
@@ -113,7 +170,48 @@ echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 
 }
 
+teardownLvmNonFormattedDiskSetup
+
 lvmNonFormattedDiskSetup
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -9,4 +9,4 @@ echo '>>> INSTALL Utils Linux packages'
 
 sudo apt-get update -y
 
-sudo apt-get install -y curl bash git wget iputils-ping jq figlet yq gettext
+sudo apt-get install -y curl bash git wget iputils-ping jq figlet yq gettext build-essential
