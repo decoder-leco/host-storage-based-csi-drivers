@@ -77,8 +77,6 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${CE
 # instead we will build from source topolvm and its docker image
 ###
 
-topoLVMbuildFromSrc () {
-
 export TOPOLVM_BUILD_FROM_SRC_HOME=$(mktemp -d -t XXXXXX_TOPOLVM_BUILD_FROM_SRC)
 echo " > TOPOLVM_BUILD_FROM_SRC_HOME=[${TOPOLVM_BUILD_FROM_SRC_HOME}]"
 
@@ -92,6 +90,9 @@ echo "# TOPOLVM_VERSION=[${TOPOLVM_VERSION}]"
 echo "#####################################"
 
 
+topoLVMbuildFromSrc_gitClone () {
+
+
 # git clone https://github.com/topolvm/topolvm.git ${TOPOLVM_BUILD_FROM_SRC_HOME}
 
 git clone --depth 1 --branch v${TOPOLVM_DESIRED_VERSION} https://github.com/topolvm/topolvm.git ${TOPOLVM_BUILD_FROM_SRC_HOME}
@@ -99,7 +100,9 @@ git clone --depth 1 --branch v${TOPOLVM_DESIRED_VERSION} https://github.com/topo
 cd ${TOPOLVM_BUILD_FROM_SRC_HOME}
 
 # git checkout v${TOPOLVM_DESIRED_VERSION}
+}
 
+topoLVMbuildFromSrc () {
 source ~/.bashrc
 export PATH=$PATH:/usr/local/go/bin
 export GOBIN=/usr/local/go/bin
@@ -118,6 +121,10 @@ echo "#####################################"
 
 make build/lvmd TOPOLVM_VERSION=${TOPOLVM_DESIRED_VERSION}
 tar czf lvmd-${TOPOLVM_DESIRED_VERSION}.tar.gz -C ./build lvmd
+
+}
+
+topoLVMDovkerBuild () {
 # ---
 # build docker images
 echo "#####################################"
@@ -175,7 +182,11 @@ docker images | grep topolvm
 
 figlet 'TopoLVM Build From Source'
 
-topoLVMbuildFromSrc
+topoLVMbuildFromSrc_gitClone
+
+# topoLVMbuildFromSrc
+
+topoLVMDovkerBuild
 
 echo "DEBUG STOP"
 exit 0
@@ -183,12 +194,12 @@ exit 0
 export CHECK_TOPOLVM_IMG_EXIST=$(docker images | grep topolvm)
 export CHECK_TOPOLVM_SIDECAR_IMG_EXIST=$(docker images | grep 'topolvm-with-sidecar')
 
-if [ "x${CHECK_TOPOLVM_IMG_EXIST}" == "x" ]; then
-  topoLVMbuildFromSrc
-else 
-  echo "TopoLVM images - already exist"
-  docker images | grep topolvm
-fi;
+# if [ "x${CHECK_TOPOLVM_IMG_EXIST}" == "x" ]; then
+#   topoLVMbuildFromSrc
+# else 
+#   echo "TopoLVM images - already exist"
+#   docker images | grep topolvm
+# fi;
 
 # echo "DEBUG STOP"
 # exit 0
@@ -201,7 +212,7 @@ export TOPOLVM_IMG_TAG="0.30.0"
 export TOPOLVM_IMG_GUN="${TOPOLVM_OCI_REG_FQDN}/${TOPOLVM_IMG_NAME}:${TOPOLVM_IMG_TAG}"
 export TOPOLVM_IMG_GUN_TO_PUSH="localhost:5001/${TOPOLVM_IMG_NAME}:${TOPOLVM_IMG_TAG}"
 # docker pull --platform linux/arm64 ${TOPOLVM_IMG_GUN}
-docker pull --platform linux/amd64 ${TOPOLVM_IMG_GUN}
+# docker pull --platform linux/amd64 ${TOPOLVM_IMG_GUN}
 docker tag ${TOPOLVM_IMG_GUN} ${TOPOLVM_IMG_GUN_TO_PUSH}
 docker push ${TOPOLVM_IMG_GUN_TO_PUSH}
 docker rmi ${TOPOLVM_IMG_GUN_TO_PUSH} --force
@@ -211,6 +222,8 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 
 
 
+# export TOPOLVM_K8S_NS="topolvm-system"
+# export TOPOLVM_VOL_GRP_NAME="vg-decoderleco"
 
 
 helm install --namespace=${TOPOLVM_K8S_NS} \
@@ -218,7 +231,9 @@ helm install --namespace=${TOPOLVM_K8S_NS} \
     --set cert-manager.enabled=false \
     --set lvmd.deviceClasses[0].name="hdd" \
     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
-    --set image.repository="${TOPOLVM_IMG_GUN_TO_PUSH}"
+    --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
+    --set image.tag="${TOPOLVM_IMG_TAG}"
+    
 # cat values.yaml | yq '.lvmd.deviceClasses[0]["volume-group"]'
 # ~$ cat values.yaml | yq '.["cert-manager"]' -y
 # enabled: false
@@ -231,7 +246,9 @@ helm install --namespace=${TOPOLVM_K8S_NS} \
 #       spare-gb: 10
 sleep 5s
 
-kubectl get pod -n topolvm-system
+kubectl -n topolvm-system get pod
+kubectl -n topolvm-system get all
+
 
 figlet "Test TopoLVM"
 # - 
