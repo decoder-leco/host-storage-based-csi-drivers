@@ -33,6 +33,56 @@ resource "null_resource" "prepare_os" {
   // depends_on = [ ]
 }
 
+
+
+
+/***
+ * LVM Setup on TopoLVM Dedicated Disk
+ * - 
+ **/
+resource "null_resource" "topolvm_disk_lvm_setup" {
+  # ---
+  # Establishes connection to be used by all
+  # generic remote provisioners (i.e. file/remote-exec)
+  connection {
+    type = "ssh"
+    user = var.vm_ssh_auth_desired_keypair.username
+    // password = var.root_password
+    private_key = file(var.vm_ssh_auth_desired_keypair.private_key_file)
+    host        = var.vm_host
+  }
+
+  provisioner "file" {
+    source      = "./scripts/k8s/csi/topolvm/disk/lvm/setup.sh"
+    destination = "/tmp/topolvm.disk.lvm.setup.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f ~/.topolvm.disk.lvm.setup.env.sh || true",
+      "echo \"export TOPOLVM_DISK_DEVICE_NAME=${var.topolvm_disk_device_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm.disk.lvm.setup.env.sh",
+      "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm.disk.lvm.setup.env.sh",
+      "chmod +x /tmp/topolvm.disk.lvm.setup.sh",
+      "/tmp/topolvm.disk.lvm.setup.sh"
+    ]
+  }
+  depends_on = [
+    null_resource.prepare_os
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # ---
 #  Provision the Docker Registry that 
 # will be used by the Kubernetes Cluster
@@ -66,7 +116,8 @@ resource "null_resource" "provision_docker_registry" {
     ]
   }
   depends_on = [
-    null_resource.prepare_os
+    null_resource.prepare_os,
+    null_resource.topolvm_disk_lvm_setup
   ]
 }
 
@@ -110,6 +161,42 @@ resource "null_resource" "provision_k8s_cluster" {
   }
   depends_on = [
     null_resource.prepare_os,
-    null_resource.provision_docker_registry
+    null_resource.provision_docker_registry,
+    null_resource.topolvm_disk_lvm_setup
+  ]
+}
+
+/***
+ * TopoLVM Csi Driver Provisioning
+ * - 
+ **/
+resource "null_resource" "topolvm_csi_provisioning" {
+  # ---
+  # Establishes connection to be used by all
+  # generic remote provisioners (i.e. file/remote-exec)
+  connection {
+    type = "ssh"
+    user = var.vm_ssh_auth_desired_keypair.username
+    // password = var.root_password
+    private_key = file(var.vm_ssh_auth_desired_keypair.private_key_file)
+    host        = var.vm_host
+  }
+
+  provisioner "file" {
+    source      = "./scripts/k8s/csi/topolvm/provision.sh"
+    destination = "/tmp/provision.topolvm.csi.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f ~/.topolvm_provisioning.env.sh || true",
+      "echo \"export TOPOLVM_K8S_NS=${var.topolvm_k8s_namespace}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
+      "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
+      "chmod +x /tmp/provision.topolvm.csi.sh",
+      "/tmp/provision.topolvm.csi.sh"
+    ]
+  }
+  depends_on = [
+    null_resource.topolvm_disk_lvm_setup,
+    null_resource.provision_k8s_cluster
   ]
 }

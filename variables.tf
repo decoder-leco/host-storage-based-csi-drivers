@@ -75,3 +75,31 @@ variable "metallb_k8s_namespace" {
   description = "The kubernetes namespace in which to provision the MetalLb Kubernetes External Load Balancer."
   default     = "k8s-cluster-decoderleco"
 }
+
+
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > TOPOLVM 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# 
+
+variable "topolvm_vol_grp_name" {
+  type        = string
+  description = "The name of the volume group that TopoLVM will use, to provision LVM logical volumes - based Kubernetes Persistent Volumes."
+  default     = "vg-decoderleco"
+}
+variable "topolvm_disk_device_name" {
+  type        = string
+  description = "The Linux full device path, of the disk which Topolvm is going to use: in which the LVM Volume Group used by topoLVM will be created."
+  default     = "/dev/sdc"
+}
+
+
+variable "topolvm_k8s_namespace" {
+  type        = string
+  description = "The kubernetes namespace in which to provision the TOPOLVM Kubernetes CSI driver."
+  default     = "topolvm-system"
+}
