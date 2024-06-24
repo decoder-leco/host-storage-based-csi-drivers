@@ -238,9 +238,40 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 #  quay.io/jetstack/cert-manager-controller:v1.7.0
 #  quay.io/jetstack/cert-manager-webhook:v1.7.0
 
+# ---
+# LAST THING TO ADJUST: 
+#  > add storage class for the "hdd-thin" instead of "ssd-thin"
+#  > I will test if it works if I set lvmd.managed=true
+#  The other paramters are identical, except the replica count
+exit 37
+cat <<EOF >./values.yaml
+controller:
+  replicaCount: 1
 
-# export TOPOLVM_K8S_NS="topolvm-system"
-# export TOPOLVM_VOL_GRP_NAME="vg-decoderleco"
+lvmd:
+  managed: false
+
+cert-manager:
+  enabled: true
+
+storageClasses:
+  - name: topolvm-provisioner
+    storageClass:
+      fsType: xfs
+      isDefaultClass: false
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+  - name: topolvm-provisioner-thin
+    storageClass:
+      fsType: xfs
+      isDefaultClass: false
+      volumeBindingMode: WaitForFirstConsumer
+      allowVolumeExpansion: true
+      additionalParameters:
+        "topolvm.io/device-class": "hdd-thin"
+      # additionalParameters:
+      #   "topolvm.io/device-class": "ssd-thin"
+EOF
 
 
 # helm install --namespace=${TOPOLVM_K8S_NS} \
