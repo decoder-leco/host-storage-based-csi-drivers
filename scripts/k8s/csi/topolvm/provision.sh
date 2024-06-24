@@ -145,7 +145,8 @@ export TOPOLVM_IMG_GUN="${TOPOLVM_OCI_REG_FQDN}/${TOPOLVM_IMG_NAME}:${TOPOLVM_IM
 # --- >
 
 mkdir -p build
-docker build --no-cache \
+# docker build --no-cache \
+docker build \
 	--platform linux/amd64 \
 	-t ${TOPOLVM_IMG_GUN} \
 	--build-arg TOPOLVM_VERSION=${TOPOLVM_DESIRED_VERSION} \
@@ -159,7 +160,8 @@ export TOPOLVM_IMG_TAG="0.30.0"
 export TOPOLVM_IMG_GUN="${TOPOLVM_OCI_REG_FQDN}/${TOPOLVM_IMG_NAME}:${TOPOLVM_IMG_TAG}"
 
 mkdir -p build
-docker build --no-cache \
+# docker build --no-cache \
+docker build \
 	--platform linux/amd64 \
 	-t ${TOPOLVM_IMG_GUN} \
 	--build-arg TOPOLVM_VERSION=${TOPOLVM_DESIRED_VERSION} \
@@ -188,8 +190,8 @@ topoLVMbuildFromSrc_gitClone
 
 topoLVMDovkerBuild
 
-echo "DEBUG STOP"
-exit 0
+# echo "DEBUG STOP"
+# exit 0
 
 export CHECK_TOPOLVM_IMG_EXIST=$(docker images | grep topolvm)
 export CHECK_TOPOLVM_SIDECAR_IMG_EXIST=$(docker images | grep 'topolvm-with-sidecar')
