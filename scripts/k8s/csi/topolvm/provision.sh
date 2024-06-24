@@ -16,6 +16,8 @@ source ~/.topolvm_provisioning.env.sh || true
 export TOPOLVM_K8S_NS=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_K8S_NS' | awk -F '=' '{ print $NF }' | sed 's#"##g')
 export TOPOLVM_VOL_GRP_NAME=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_VOL_GRP_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
 export TOPOLVM_DESIRED_VERSION=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_DESIRED_VERSION' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export LVM_THINPOOL_NAME=$(cat ~/.topolvm_provisioning.env.sh | grep 'LVM_THINPOOL_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+
 
 
 if [ "x${TOPOLVM_K8S_NS}" == "x" ]; then
@@ -33,6 +35,10 @@ if [ "x${TOPOLVM_DESIRED_VERSION}" == "x" ]; then
   exit 7
 fi;
 
+if [ "x${LVM_THINPOOL_NAME}" == "x" ]; then
+  echo "ERROR! The 'LVM_THINPOOL_NAME' env. var. must be set, but is not!"
+  exit 7
+fi;
 
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
@@ -40,6 +46,7 @@ echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ##
 echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_K8S_NS=[${TOPOLVM_K8S_NS}]"
 echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_VOL_GRP_NAME=[${TOPOLVM_VOL_GRP_NAME}]"
 echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_DESIRED_VERSION=[${TOPOLVM_DESIRED_VERSION}]"
+echo "### >>> TOPOLVM PROVISIONING - LVM_THINPOOL_NAME=[${LVM_THINPOOL_NAME}]"
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
@@ -178,14 +185,6 @@ docker build \
 
 # make multi-platform-image-normal
 # make multi-platform-image-with-sidecar
-
-
-
-
-
-
-
-
 docker images | grep topolvm
 
 }
@@ -245,11 +244,27 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 #  The other paramters are identical, except the replica count
 exit 37
 cat <<EOF >./values.yaml
-controller:
-  replicaCount: 1
+# controller:
+#   replicaCount: 1
 
 lvmd:
-  managed: false
+  # managed: false
+  # lvmd.deviceClasses -- Specify the device-class settings.
+  deviceClasses:
+    - name: hdd
+      volume-group: ${TOPOLVM_VOL_GRP_NAME}
+      default: true
+      # the 'spare-gb' parameter must match the value set in the [/topolvm/run/lvmd.yaml]
+      spare-gb: 10
+  deviceClasses:
+    - name: hdd-thin
+      volume-group: ${TOPOLVM_VOL_GRP_NAME}
+      default: false
+      # the below parameters must match the value set in the [/topolvm/run/lvmd.yaml]
+      type: thin
+      thin-pool:
+        name: ${LVM_THINPOOL_NAME}
+        overprovision-ratio: 10.0
 
 cert-manager:
   enabled: true

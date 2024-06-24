@@ -135,7 +135,8 @@ device-classes:
 EOF
 
 
-sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 1=" ./lvmd.yaml | tee ${LVMD_HOME}/run/lvmd.yaml
+# sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 1=" ./lvmd.yaml | tee ${LVMD_HOME}/run/lvmd.yaml
+sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 10=" ./lvmd.yaml | tee ${LVMD_HOME}/run/lvmd.yaml
 
 # ---
 # Creating the SystemD unit for 
