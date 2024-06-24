@@ -4,7 +4,7 @@ set -o errexit
 # --- why [set -uxo pipefail] and not [set -o errexit] ?
 # 
 
-figlet 'TOPOLVM DISL LVM SETUP'
+figlet 'TOPOLVM DISK LVM SETUP'
 
 ls -alh  ~/.topolvm.disk.lvm.setup.env.sh
 
@@ -33,8 +33,9 @@ if [ "x${TOPOLVM_VOL_GRP_NAME}" == "x" ]; then
 fi;
 
 
-
-
+# --- 
+#  https://github.com/topolvm/topolvm/blob/f6b7b2e45f4798497b0a3fb590aac8c2a026622c/example/Makefile#L62C29-L62C66
+sudo apt-get install -y lvm2 xfsprogs thin-provisioning-tools
 
 
 
@@ -70,7 +71,7 @@ echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 echo ">>> >>> # Remove LVM Volume Group: "
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 
-sudo vgremove ${TOPOLVM_VOL_GRP_NAME}
+sudo vgremove ${TOPOLVM_VOL_GRP_NAME} || true
 
 echo ">> List LVM Physical Volumes:"
 
@@ -96,7 +97,6 @@ lvmNonFormattedDiskSetup() {
 
 figlet "LVM setup"
 
-sudo apt-get install -y lvm2
 
 # export DEVICE_NAME="/dev/$(basename $(readlink /dev/disk/by-id/google-${DISK_NAME}))"
 
@@ -173,6 +173,7 @@ echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 teardownLvmNonFormattedDiskSetup
 
 lvmNonFormattedDiskSetup
+
 
 
 

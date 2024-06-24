@@ -15,6 +15,8 @@ source ~/.topolvm_provisioning.env.sh || true
 
 export TOPOLVM_K8S_NS=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_K8S_NS' | awk -F '=' '{ print $NF }' | sed 's#"##g')
 export TOPOLVM_VOL_GRP_NAME=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_VOL_GRP_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export TOPOLVM_DESIRED_VERSION=$(cat ~/.topolvm_provisioning.env.sh | grep 'TOPOLVM_DESIRED_VERSION' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+
 
 if [ "x${TOPOLVM_K8S_NS}" == "x" ]; then
   echo "ERROR! The 'TOPOLVM_K8S_NS' env. var. must be set, but is not!"
@@ -26,12 +28,18 @@ if [ "x${TOPOLVM_VOL_GRP_NAME}" == "x" ]; then
   exit 7
 fi;
 
+if [ "x${TOPOLVM_DESIRED_VERSION}" == "x" ]; then
+  echo "ERROR!!! The 'TOPOLVM_DESIRED_VERSION' env. var. is not set!"
+  exit 7
+fi;
+
 
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_K8S_NS=[${TOPOLVM_K8S_NS}]"
 echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_VOL_GRP_NAME=[${TOPOLVM_VOL_GRP_NAME}]"
+echo "### >>> TOPOLVM PROVISIONING - TOPOLVM_DESIRED_VERSION=[${TOPOLVM_DESIRED_VERSION}]"
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
@@ -235,13 +243,13 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 # export TOPOLVM_VOL_GRP_NAME="vg-decoderleco"
 
 
-helm install --namespace=${TOPOLVM_K8S_NS} \
-    topolvm topolvm/topolvm \
-    --set cert-manager.enabled=true \
-    --set lvmd.deviceClasses[0].name="hdd" \
-    --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
-    --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
-    --set image.tag="${TOPOLVM_IMG_TAG}"
+# helm install --namespace=${TOPOLVM_K8S_NS} \
+#     topolvm topolvm/topolvm \
+#     --set cert-manager.enabled=true \
+#     --set lvmd.deviceClasses[0].name="hdd" \
+#     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
+#     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
+#     --set image.tag="${TOPOLVM_IMG_TAG}"
     
 
 helm upgrade --namespace=${TOPOLVM_K8S_NS} \
@@ -251,6 +259,11 @@ helm upgrade --namespace=${TOPOLVM_K8S_NS} \
     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
     --set image.tag="${TOPOLVM_IMG_TAG}"
+
+kubectl wait --for=condition=available --timeout=120s -n ${TOPOLVM_K8S_NS} deployments/topolvm-controller
+kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} -l="app.kubernetes.io/component=controller,app.kubernetes.io/name=topolvm" pod
+kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} certificate/topolvm-mutatingwebhook
+
 # cat values.yaml | yq '.lvmd.deviceClasses[0]["volume-group"]'
 # ~$ cat values.yaml | yq '.["cert-manager"]' -y
 # enabled: false

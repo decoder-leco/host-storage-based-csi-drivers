@@ -123,6 +123,48 @@ resource "null_resource" "provision_docker_registry" {
 
 
 # ---
+#  Provision the LVMD on the machine where KIND runs
+#  LVMD is configured and started as a SystemD unit
+resource "null_resource" "provision_lvmd_on_host" {
+  # ...
+
+  # Establishes connection to be used by all
+  # generic remote provisioners (i.e. file/remote-exec)
+  connection {
+    type = "ssh"
+    user = var.vm_ssh_auth_desired_keypair.username
+    // password = var.root_password
+    private_key = file(var.vm_ssh_auth_desired_keypair.private_key_file)
+    host        = var.vm_host
+  }
+  # ---
+  #  A dummy minio container is deployed, just to test
+  #  that we can access it through the Public IP on 
+  #  port 9001 : to test the ingress security rules defined above
+  provisioner "file" {
+    source      = "./scripts/k8s/csi/topolvm/lvmd/lvmd.pre.cluster.setup.sh"
+    destination = "/tmp/lvmd.pre.cluster.setup.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f ~/.lvmd.setup.env.sh || true",
+      "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.lvmd.setup.env.sh",
+      "echo \"export TOPOLVM_DESIRED_VERSION=${var.topolvm_desired_version}\" | tee -a ~/.bashrc | tee -a ~/.lvmd.setup.env.sh",
+      "echo \"export LVM_THINPOOL_NAME=${var.lvm_thinpool_name}\" | tee -a ~/.bashrc | tee -a ~/.lvmd.setup.env.sh",
+      "echo \"export LVMD_HOME=${var.lvmd_home}\" | tee -a ~/.bashrc | tee -a ~/.lvmd.setup.env.sh",
+      "chmod +x /tmp/lvmd.pre.cluster.setup.sh",
+      "/tmp/lvmd.pre.cluster.setup.sh"
+    ]
+  }
+  depends_on = [
+    null_resource.prepare_os,
+    null_resource.provision_docker_registry,
+    null_resource.topolvm_disk_lvm_setup
+  ]
+  
+  
+}
+# ---
 #  Kubernetes Cluster Provisioning
 resource "null_resource" "provision_k8s_cluster" {
   # ...
@@ -155,6 +197,11 @@ resource "null_resource" "provision_k8s_cluster" {
       "echo \"export OCI_REGISTRY_PORT=${var.oci_registry_port}\" | tee -a ~/.bashrc | tee -a ~/.k8s_cluster_provision.env.sh",
       "echo \"export KND_CLUSTER_NAME=${var.knd_cluster_name}\" | tee -a ~/.bashrc | tee -a ~/.k8s_cluster_provision.env.sh",
       "echo \"export KND_CLUSTER_CONFIG_FILE=/tmp/kind_cluster_config.yaml\" | tee -a ~/.bashrc | tee -a ~/.k8s_cluster_provision.env.sh",
+
+      "echo \"export KUBERNETES_VERSION=${var.kubernetes_version}\" | tee -a ~/.bashrc | tee -a ~/.k8s_cluster_provision.env.sh",
+      "echo \"export LVMD_HOME=${var.lvmd_home}\" | tee -a ~/.bashrc | tee -a ~/.k8s_cluster_provision.env.sh",
+
+
       "chmod +x /tmp/k8s_cluster_provision.sh",
       "/tmp/k8s_cluster_provision.sh"
     ]
@@ -162,7 +209,8 @@ resource "null_resource" "provision_k8s_cluster" {
   depends_on = [
     null_resource.prepare_os,
     null_resource.provision_docker_registry,
-    null_resource.topolvm_disk_lvm_setup
+    null_resource.topolvm_disk_lvm_setup,
+    null_resource.provision_lvmd_on_host
   ]
 }
 
@@ -190,7 +238,7 @@ resource "null_resource" "topolvm_csi_provisioning" {
     source      = "./scripts/prepare_os/install_golang.sh"
     destination = "/tmp/install.golang.topolvm.csi.sh"
   }
-  
+
   provisioner "remote-exec" {
     inline = [
       "rm -f ~/.topolvm_provisioning.env.sh || true",
@@ -198,6 +246,7 @@ resource "null_resource" "topolvm_csi_provisioning" {
       "chmod +x /tmp/install.golang.topolvm.csi.sh",
       "/tmp/install.golang.topolvm.csi.sh",
       "echo \"export TOPOLVM_K8S_NS=${var.topolvm_k8s_namespace}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
+      "echo \"export TOPOLVM_DESIRED_VERSION=${var.topolvm_desired_version}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "chmod +x /tmp/provision.topolvm.csi.sh",
       "/tmp/provision.topolvm.csi.sh"

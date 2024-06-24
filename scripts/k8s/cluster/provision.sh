@@ -10,10 +10,13 @@ source ~/.k8s_cluster_provision.env.sh || true
 
 # ---
 #  
-export OCI_REGISTRY_CONTAINER_NAME=$(cat ~/.k8s_cluster_provision.env.sh | grep 'OCI_REGISTRY_CONTAINER_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
-export OCI_REGISTRY_PORT=$(cat ~/.k8s_cluster_provision.env.sh | grep 'OCI_REGISTRY_PORT' | awk -F '=' '{ print $NF }' | sed 's#"##g')
-export KND_CLUSTER_NAME=$(cat ~/.k8s_cluster_provision.env.sh | grep 'KND_CLUSTER_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
 export KND_CLUSTER_CONFIG_FILE=$(cat ~/.k8s_cluster_provision.env.sh | grep 'KND_CLUSTER_CONFIG_FILE' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export KND_CLUSTER_NAME=$(cat ~/.k8s_cluster_provision.env.sh | grep 'KND_CLUSTER_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export OCI_REGISTRY_PORT=$(cat ~/.k8s_cluster_provision.env.sh | grep 'OCI_REGISTRY_PORT' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export OCI_REGISTRY_CONTAINER_NAME=$(cat ~/.k8s_cluster_provision.env.sh | grep 'OCI_REGISTRY_CONTAINER_NAME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export KUBERNETES_VERSION=$(cat ~/.k8s_cluster_provision.env.sh | grep 'KUBERNETES_VERSION' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+export LVMD_HOME=$(cat ~/.k8s_cluster_provision.env.sh | grep 'LVMD_HOME' | awk -F '=' '{ print $NF }' | sed 's#"##g')
+
 
 if [ "x${KND_CLUSTER_CONFIG_FILE}" == "x" ]; then
   echo "ERROR! The 'KND_CLUSTER_CONFIG_FILE' env. var. must be set, but is not!"
@@ -35,6 +38,16 @@ if [ "x${OCI_REGISTRY_CONTAINER_NAME}" == "x" ]; then
   exit 7
 fi;
 
+if [ "x${KUBERNETES_VERSION}" == "x" ]; then
+  echo "ERROR!!! The 'KUBERNETES_VERSION' env. var. is not set!"
+  exit 7
+fi;
+
+if [ "x${LVMD_HOME}" == "x" ]; then
+  echo "ERROR!!! The 'LVMD_HOME' env. var. is not set!"
+  exit 7
+fi;
+
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
@@ -42,6 +55,8 @@ echo "### >>> KIND CLUSTER PROVISIONING - KND_CLUSTER_CONFIG_FILE=[${KND_CLUSTER
 echo "### >>> KIND CLUSTER PROVISIONING - KND_CLUSTER_NAME=[${KND_CLUSTER_NAME}]"
 echo "### >>> KIND CLUSTER PROVISIONING - OCI_REGISTRY_PORT=[${OCI_REGISTRY_PORT}]"
 echo "### >>> KIND CLUSTER PROVISIONING - OCI_REGISTRY_CONTAINER_NAME=[${OCI_REGISTRY_CONTAINER_NAME}]"
+echo "### >>> KIND CLUSTER PROVISIONING - KUBERNETES_VERSION=[${KUBERNETES_VERSION}]"
+echo "### >>> KIND CLUSTER PROVISIONING - LVMD_HOME=[${LVMD_HOME}]"
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "
 echo "### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> ### >>> "

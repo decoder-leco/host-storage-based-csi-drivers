@@ -112,3 +112,51 @@ variable "topolvm_csi_golang_version" {
   default     = "1.22.4"
 }
 
+variable "topolvm_desired_version" {
+  type        = string
+  description = "The TopoLVM version."
+  default     = "0.30.0"
+}
+
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > Kubernetes Cluster 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# 
+#######################
+## Kubernetes Version
+#######################
+variable "kubernetes_version" {
+  type        = string
+  description = "The Kubernetes version."
+  default     = "1.30.0"
+}
+
+
+
+
+
+
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > LVMD
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# --- > --- > --- > --- > --- > --- > --- > --- > 
+# 
+
+variable "lvm_thinpool_name" {
+  type        = string
+  description = "The LVM Thinpool used in the LVMD configuration (a yaml file)."
+  default     = "thinpool"
+}
+
+variable "lvmd_home" {
+  type        = string
+  description = "The folder in which LVMD will be installed on the hos running the Kind Kubernetes Cluster."
+  default     = "/opt/lvmd"
+}
