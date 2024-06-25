@@ -242,11 +242,13 @@ docker rmi ${TOPOLVM_IMG_GUN} --force
 #  > add storage class for the "hdd-thin" instead of "ssd-thin"
 #  > I will test if it works if I set lvmd.managed=true
 #  The other paramters are identical, except the replica count
-exit 37
+# exit 37
 cat <<EOF >./values.yaml
 # controller:
 #   replicaCount: 1
-
+image:
+  repository: localhost:5001/${TOPOLVM_IMG_NAME}
+  tag: ${TOPOLVM_IMG_TAG}
 lvmd:
   # managed: false
   # lvmd.deviceClasses -- Specify the device-class settings.
@@ -297,14 +299,16 @@ EOF
 #     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
 #     --set image.tag="${TOPOLVM_IMG_TAG}"
     
-
 helm upgrade --namespace=${TOPOLVM_K8S_NS} \
     topolvm topolvm/topolvm \
-    --set cert-manager.enabled=true \
-    --set lvmd.deviceClasses[0].name="hdd" \
-    --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
-    --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
-    --set image.tag="${TOPOLVM_IMG_TAG}"
+    --values ./values.yaml
+# helm upgrade --namespace=${TOPOLVM_K8S_NS} \
+#     topolvm topolvm/topolvm \
+#     --set cert-manager.enabled=true \
+#     --set lvmd.deviceClasses[0].name="hdd" \
+#     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
+#     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
+#     --set image.tag="${TOPOLVM_IMG_TAG}"
 
 kubectl wait --for=condition=available --timeout=120s -n ${TOPOLVM_K8S_NS} deployments/topolvm-controller
 kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} -l="app.kubernetes.io/component=controller,app.kubernetes.io/name=topolvm" pod

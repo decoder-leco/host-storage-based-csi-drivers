@@ -107,17 +107,22 @@ git clone --depth 1 --branch v${TOPOLVM_DESIRED_VERSION} https://github.com/topo
 
 cd ${LVMD_BUILD_FROM_SRC_HOME}
 
+export PATH=$PATH:/usr/local/go/bin
+go version
+
 go build -o ./build/lvmd ./cmd/lvmd
 
 sudo mv ./build/lvmd ${LVMD_HOME}/bin/
 
-chmod +x ${LVMD_HOME}/bin/lvmd
+sudo chmod +x ${LVMD_HOME}/bin/lvmd
 
 # ${LVMD_HOME}/bin/lvmd version
 
 }
 
+createThinPool
 
+buildLvmdromSrc
 
 cat <<EOF >./lvmd.yaml
 socket-name: /run/topolvm/lvmd.sock
@@ -136,12 +141,22 @@ EOF
 
 
 # sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 1=" ./lvmd.yaml | tee ${LVMD_HOME}/run/lvmd.yaml
-sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 10=" ./lvmd.yaml | tee ${LVMD_HOME}/run/lvmd.yaml
+sed -e "s=/run/topolvm/lvmd.sock=${LVMD_HOME}/run/lvmd.sock=; s=spare-gb: 10=spare-gb: 10=" ./lvmd.yaml | sudo tee ${LVMD_HOME}/run/lvmd.yaml
 
 # ---
 # Creating the SystemD unit for 
 # lvmd process: when that unit starts, it
 # will create the unix socket used by topolvm.
 # -
+sudo systemctl stop lvmd.service || true
+sudo systemctl disable lvmd || true
+sudo rm /etc/systemd/system/lvmd.service || true
+# and symlinks that might be related
+sudo rm /etc/systemd/system/lvmd.service || true
+sudo rm /usr/lib/systemd/system/lvmd.service || true
+# and symlinks that might be related
+sudo rm /usr/lib/systemd/system/lvmd.service || true
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
 sudo systemd-run --unit=lvmd.service ${LVMD_HOME}/bin/lvmd --config=${LVMD_HOME}/run/lvmd.yaml
 

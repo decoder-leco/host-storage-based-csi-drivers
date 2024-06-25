@@ -161,8 +161,8 @@ resource "null_resource" "provision_lvmd_on_host" {
     null_resource.provision_docker_registry,
     null_resource.topolvm_disk_lvm_setup
   ]
-  
-  
+
+
 }
 # ---
 #  Kubernetes Cluster Provisioning

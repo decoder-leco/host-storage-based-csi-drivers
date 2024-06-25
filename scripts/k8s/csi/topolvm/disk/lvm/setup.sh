@@ -59,7 +59,7 @@ sudo lsblk -o name,size,fstype
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 echo ">>> >>> # Remove LVM Physical Volumes from volume group: "
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
-vgreduce ${TOPOLVM_VOL_GRP_NAME} ${TOPOLVM_DISK_DEVICE_NAME} || true
+sudo vgreduce ${TOPOLVM_VOL_GRP_NAME} ${TOPOLVM_DISK_DEVICE_NAME} || true
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 echo ">>> >>> # Remove LVM Physical Volumes: "
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
@@ -71,7 +71,7 @@ echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 echo ">>> >>> # Remove LVM Volume Group: "
 echo ">>> >>> >>> >>> >>> >>> >>> >>> >>> >>> "
 
-sudo vgremove ${TOPOLVM_VOL_GRP_NAME} || true
+sudo vgremove ${TOPOLVM_VOL_GRP_NAME} --force --force || true
 
 echo ">> List LVM Physical Volumes:"
 
