@@ -250,7 +250,7 @@ image:
   repository: localhost:5001/${TOPOLVM_IMG_NAME}
   tag: ${TOPOLVM_IMG_TAG}
 lvmd:
-  # managed: false
+  managed: false
   # lvmd.deviceClasses -- Specify the device-class settings.
   deviceClasses:
     - name: hdd
