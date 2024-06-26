@@ -248,6 +248,7 @@ resource "null_resource" "topolvm_csi_provisioning" {
       "echo \"export TOPOLVM_K8S_NS=${var.topolvm_k8s_namespace}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "echo \"export TOPOLVM_DESIRED_VERSION=${var.topolvm_desired_version}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "echo \"export TOPOLVM_VOL_GRP_NAME=${var.topolvm_vol_grp_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
+      "echo \"export LVM_THINPOOL_NAME=${var.lvm_thinpool_name}\" | tee -a ~/.bashrc | tee -a ~/.topolvm_provisioning.env.sh",
       "chmod +x /tmp/provision.topolvm.csi.sh",
       "/tmp/provision.topolvm.csi.sh"
     ]

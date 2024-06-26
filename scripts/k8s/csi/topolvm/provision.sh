@@ -139,7 +139,7 @@ tar czf lvmd-${TOPOLVM_DESIRED_VERSION}.tar.gz -C ./build lvmd
 
 }
 
-topoLVMDovkerBuild () {
+topoLVMDockerBuild () {
 # ---
 # build docker images
 echo "#####################################"
@@ -195,7 +195,7 @@ topoLVMbuildFromSrc_gitClone
 
 # topoLVMbuildFromSrc
 
-topoLVMDovkerBuild
+topoLVMDockerBuild
 
 # echo "DEBUG STOP"
 # exit 0
@@ -298,17 +298,23 @@ EOF
 #     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
 #     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
 #     --set image.tag="${TOPOLVM_IMG_TAG}"
-    
-helm upgrade --namespace=${TOPOLVM_K8S_NS} \
-    topolvm topolvm/topolvm \
-    --values ./values.yaml
-# helm upgrade --namespace=${TOPOLVM_K8S_NS} \
+
+# helm install --namespace=${TOPOLVM_K8S_NS} \
 #     topolvm topolvm/topolvm \
 #     --set cert-manager.enabled=true \
 #     --set lvmd.deviceClasses[0].name="hdd" \
 #     --set lvmd.deviceClasses[0].volume-group="${TOPOLVM_VOL_GRP_NAME}" \
 #     --set image.repository="localhost:5001/${TOPOLVM_IMG_NAME}" \
 #     --set image.tag="${TOPOLVM_IMG_TAG}"
+
+    
+helm install --namespace=${TOPOLVM_K8S_NS} \
+    topolvm topolvm/topolvm \
+    --values ./values.yaml
+    
+# helm upgrade --namespace=${TOPOLVM_K8S_NS} \
+#     topolvm topolvm/topolvm \
+#     --values ./values.yaml
 
 kubectl wait --for=condition=available --timeout=120s -n ${TOPOLVM_K8S_NS} deployments/topolvm-controller
 kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} -l="app.kubernetes.io/component=controller,app.kubernetes.io/name=topolvm" pod

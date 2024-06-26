@@ -34,7 +34,13 @@ sudo mkdir -p ${LVMD_HOME}/run/
 #  Also, the kind cluster node will have extra mounts to the two below folders:
 sudo rm -rf ${LVMD_HOME}/controller ${LVMD_HOME}/worker* || true
 sudo mkdir -p ${LVMD_HOME}/controller
-sudo mkdir -p ${LVMD_HOME}/worker
+sudo mkdir -p ${LVMD_HOME}/worker1
+sudo mkdir -p ${LVMD_HOME}/worker2
+sudo mkdir -p ${LVMD_HOME}/worker3
+sudo mkdir -p ${LVMD_HOME}/worker4
+sudo mkdir -p ${LVMD_HOME}/worker5
+sudo mkdir -p ${LVMD_HOME}/worker6
+sudo mkdir -p ${LVMD_HOME}/worker7
 
 
 if [ "x${TOPOLVM_VOL_GRP_NAME}" == "x" ]; then

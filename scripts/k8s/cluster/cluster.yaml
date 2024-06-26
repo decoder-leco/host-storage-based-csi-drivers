@@ -57,10 +57,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker1
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -83,10 +83,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker2
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -109,10 +109,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker3
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -135,10 +135,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker4
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -161,10 +161,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker5
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -187,10 +187,10 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker6
     propagation: Bidirectional
 - role: worker
   extraMounts:
@@ -213,8 +213,8 @@ nodes:
   # - 
   - containerPath: /run/topolvm
     # hostPath: "@TMPDIR@/lvmd"
-    hostPath: "$LVMD_HOME/run"
+    hostPath: $LVMD_HOME/run
   - containerPath: /var/lib/kubelet
     # hostPath: "@TMPDIR@/worker"
-    hostPath: "$LVMD_HOME/worker"
+    hostPath: $LVMD_HOME/worker7
     propagation: Bidirectional
