@@ -316,9 +316,9 @@ helm install --namespace=${TOPOLVM_K8S_NS} \
 #     topolvm topolvm/topolvm \
 #     --values ./values.yaml
 
-kubectl wait --for=condition=available --timeout=120s -n ${TOPOLVM_K8S_NS} deployments/topolvm-controller
-kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} -l="app.kubernetes.io/component=controller,app.kubernetes.io/name=topolvm" pod
-kubectl wait --for=condition=ready --timeout=120s -n ${TOPOLVM_K8S_NS} certificate/topolvm-mutatingwebhook
+kubectl wait --for=condition=available --timeout=720s -n ${TOPOLVM_K8S_NS} deployments/topolvm-controller
+kubectl wait --for=condition=ready --timeout=720s -n ${TOPOLVM_K8S_NS} -l="app.kubernetes.io/component=controller,app.kubernetes.io/name=topolvm" pod
+kubectl wait --for=condition=ready --timeout=720s -n ${TOPOLVM_K8S_NS} certificate/topolvm-mutatingwebhook
 
 # cat values.yaml | yq '.lvmd.deviceClasses[0]["volume-group"]'
 # ~$ cat values.yaml | yq '.["cert-manager"]' -y
