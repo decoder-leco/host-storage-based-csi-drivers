@@ -1,0 +1,231 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
+# patch the generated kubeadm config with some extra settings
+kubeadmConfigPatches:
+- |
+  apiVersion: kubeadm.k8s.io/v1beta3
+  kind: ClusterConfiguration
+  metadata:
+    name: config
+  # export KUBERNETES_VERSION=1.30.0
+  kubernetesVersion: "v$KUBERNETES_VERSION"
+  # networking:
+  #   serviceSubnet: 10.0.0.0/16
+
+nodes:
+- role: control-plane
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # --- 
+  #  For TopoLVM, as of https://github.com/topolvm/topolvm/blob/f6b7b2e45f4798497b0a3fb590aac8c2a026622c/example/kind/topolvm-cluster.yaml
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/controller"
+    hostPath: "$LVMD_HOME/controller"
+    propagation: Bidirectional
+# - role: control-plane
+#   extraMounts:
+#   - hostPath: /etc/timezone
+#     containerPath: /etc/timezone
+#     readOnly: true
+#   - hostPath: /etc/localtime
+#     containerPath: /etc/localtime
+#     readOnly: true
+#   - hostPath: /dev
+#     containerPath: /dev
+#     # readOnly: true
+#     readOnly: false
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
+- role: worker
+  extraMounts:
+  - hostPath: /etc/timezone
+    containerPath: /etc/timezone
+    readOnly: true
+  # - hostPath: /etc/localtime
+  #   containerPath: /etc/localtime
+  #   readOnly: true
+  - hostPath: /dev
+    containerPath: /dev
+    # readOnly: true
+    readOnly: false
+  # ---
+  # The volume below is to mount the
+  # lvmd socket, and lvmd config inside 
+  # the /run/topolvm folder of each worker
+  # the lvmd executable is already in the 
+  # docker container of the lvmd pod obviously
+  # - 
+  - containerPath: /run/topolvm
+    # hostPath: "@TMPDIR@/lvmd"
+    hostPath: "$LVMD_HOME/run"
+  - containerPath: /var/lib/kubelet
+    # hostPath: "@TMPDIR@/worker"
+    hostPath: "$LVMD_HOME/worker"
+    propagation: Bidirectional
