@@ -258,3 +258,51 @@ resource "null_resource" "topolvm_csi_provisioning" {
     null_resource.provision_k8s_cluster
   ]
 }
+
+/***
+ * Topology Probe
+ * - 
+ **/
+resource "null_resource" "deploy_topology_probe" {
+  # ---
+  # Establishes connection to be used by all
+  # generic remote provisioners (i.e. file/remote-exec)
+  connection {
+    type = "ssh"
+    user = var.vm_ssh_auth_desired_keypair.username
+    // password = var.root_password
+    private_key = file(var.vm_ssh_auth_desired_keypair.private_key_file)
+    host        = var.vm_host
+  }
+
+  provisioner "file" {
+    source      = "./scripts/k8s/topology_probe/7workers.bumblebee.topology.sh"
+    destination = "/tmp/7workers.bumblebee.topology.sh"
+  }
+
+  provisioner "file" {
+    source      = "./scripts/k8s/topology_probe/provision.sh"
+    destination = "/tmp/provision.topology_probe.sh"
+  }
+
+  provisioner "file" {
+    #              ./scripts/k8s/topology_probe/deploy.yaml
+    source      = "./scripts/k8s/topology_probe/deploy.yaml"
+    destination = "/tmp/topology_probe.deploy.yaml"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/7workers.bumblebee.topology.sh",
+      "/tmp/7workers.bumblebee.topology.sh ${var.knd_cluster_name}",
+      "rm -f ~/.topology_probe.env.sh || true",
+      "echo \"export DESIRED_STORAGE_CLASS=topolvm-provisioner\" | tee -a ~/.bashrc | tee -a ~/.topology_probe.env.sh",
+      "echo \"export TOPOLOGY_PROBE_DEPLOY_YAML=/tmp/topology_probe.deploy.yaml\" | tee -a ~/.bashrc | tee -a ~/.topology_probe.env.sh",
+      "chmod +x /tmp/provision.topology_probe.sh",
+      "/tmp/provision.topology_probe.sh"
+    ]
+  }
+  depends_on = [
+    null_resource.topolvm_csi_provisioning //
+  ]
+}

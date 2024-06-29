@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: whoami
+  namespace: rook-tests
+spec:
+  selector:
+    matchLabels:
+      app: whoami
+  replicas: 7
+  serviceName: whoami-server
+  template:
+    metadata:
+      namespace: rook-tests
+      labels:
+        app: whoami
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Exists
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.bumblebee.io/galaxy
+                operator: In
+                values:
+                - milkyway
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          # requiredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values: [whoami]
+              # topologyKey: kubernetes.io/hostname
+              # topologyKey: topology.rook.io/rack
+              topologyKey: topology.bumblebee.io/planet
+      containers:
+      - env:
+        - name: WHOAMI_NAME
+          value: "Vercingetorix"
+        image: "localhost:5001/${TEST_IMG}"
+        imagePullPolicy: IfNotPresent
+        name: whoami
+        ports:
+        - containerPort: 80
+          name: server
+        readinessProbe:
+          exec:
+            command:
+            - |
+               curl -X POST -d '500' http://localhost:80/health
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - |
+               curl -X POST -d '500' http://localhost:80/health
+          initialDelaySeconds: 120
+          timeoutSeconds: 2
+          periodSeconds: 5
+        volumeMounts:
+        - mountPath: /data
+          name: whoami-vol
+      restartPolicy: Always
+  volumeClaimTemplates:
+  - metadata:
+      namespace: rook-tests
+      name: whoami-vol
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: ${DESIRED_STORAGE_CLASS_NAME}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: rook-tests
+  name: whoami
+spec:
+  ports:
+  - name: server
+    port: 8989
+    targetPort: 80
+  selector:
+    app: whoami
